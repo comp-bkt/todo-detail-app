@@ -3,9 +3,10 @@ package com.example.todo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -38,7 +39,7 @@ public class TodoDetailActivity extends AppCompatActivity {
 
     /* override to write the value of mTodoIndex into the Bundle with TODO_INDEX as its key */
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt(TODO_INDEX, mTodoIndex);
     }

@@ -6,6 +6,7 @@ import android.content.res.Resources;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -38,7 +39,7 @@ public class TodoActivity extends AppCompatActivity {
 
     /* override to write the value of mTodoIndex into the Bundle with TODO_INDEX as its key */
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt(TODO_INDEX, mTodoIndex);
     }
