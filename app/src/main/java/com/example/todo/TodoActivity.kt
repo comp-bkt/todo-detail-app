@@ -20,6 +20,9 @@ class TodoActivity : AppCompatActivity() {
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
         savedInstanceState.putInt(TODO_INDEX, mTodoIndex)
+        savedInstanceState.putString(TODO_COMPLETE,
+            (findViewById<View>(R.id.textViewComplete) as TextView).text as String?
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,8 +38,10 @@ class TodoActivity : AppCompatActivity() {
 
         /* check for saved state due to changes such as rotation or back button
            and restore any saved state such as the todo_index */
+        var message:String = ""
         if (savedInstanceState != null) {
             mTodoIndex = savedInstanceState.getInt(TODO_INDEX, 0)
+            message = savedInstanceState.getString(TODO_COMPLETE, "")
         }
 
         /* TODO: Refactor to data layer */
@@ -46,7 +51,7 @@ class TodoActivity : AppCompatActivity() {
         /* initialize member TextView so we can manipulate it later */
         val textViewTodo: TextView
         textViewTodo = findViewById<View>(R.id.textViewTodo) as TextView
-        setTextViewComplete("")
+        setTextViewComplete(message)
 
         /* display the first task from mTodo array in the textViewTodo */
         textViewTodo.text = mTodos[mTodoIndex]
@@ -105,5 +110,6 @@ class TodoActivity : AppCompatActivity() {
          * the alternative is to abstract view data to a ViewModel which can be in scope in all
          * Activity states and more suitable for larger amounts of data  */
         private const val TODO_INDEX = "com.example.todoIndex"
+        private const val TODO_COMPLETE = "is_complete_message"
     }
 }
