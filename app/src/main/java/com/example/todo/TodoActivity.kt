@@ -38,7 +38,7 @@ class TodoActivity : AppCompatActivity() {
 
         /* check for saved state due to changes such as rotation or back button
            and restore any saved state such as the todo_index */
-        var message:String = ""
+        var message = ""
         if (savedInstanceState != null) {
             mTodoIndex = savedInstanceState.getInt(TODO_INDEX, 0)
             message = savedInstanceState.getString(TODO_COMPLETE, "")
@@ -50,12 +50,12 @@ class TodoActivity : AppCompatActivity() {
 
         /* initialize member TextView so we can manipulate it later */
         val textViewTodo: TextView
-        textViewTodo = findViewById<View>(R.id.textViewTodo) as TextView
+        textViewTodo = findViewById(R.id.textViewTodo)
         setTextViewComplete(message)
 
         /* display the first task from mTodo array in the textViewTodo */
         textViewTodo.text = mTodos[mTodoIndex]
-        val buttonNext = findViewById<View>(R.id.buttonNext) as Button
+        val buttonNext:Button = findViewById(R.id.buttonNext)
         buttonNext.setOnClickListener {
             mTodoIndex = (mTodoIndex + 1) % mTodos.size
             textViewTodo.text = mTodos[mTodoIndex]
@@ -72,7 +72,7 @@ class TodoActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.back_button_pressed, Toast.LENGTH_SHORT).show()
             }
         }
-        val buttonTodoDetail = findViewById<View>(R.id.buttonTodoDetail) as Button
+        val buttonTodoDetail:Button = findViewById(R.id.buttonTodoDetail)
         buttonTodoDetail.setOnClickListener {
             val intent: Intent = TodoDetailActivity.Companion.newIntent(this@TodoActivity, mTodoIndex)
             todoDetailActivityResultLauncher.launch(intent)
@@ -80,8 +80,7 @@ class TodoActivity : AppCompatActivity() {
     }
 
     private fun updateTodoComplete(is_todo_complete: Boolean) {
-        val textViewTodo: TextView
-        textViewTodo = findViewById<View>(R.id.textViewTodo) as TextView
+        val textViewTodo:TextView = findViewById(R.id.textViewTodo)
         if (is_todo_complete) {
             textViewTodo.setBackgroundColor(
                     ContextCompat.getColor(this, R.color.backgroundSuccess))
@@ -92,8 +91,7 @@ class TodoActivity : AppCompatActivity() {
     }
 
     private fun setTextViewComplete(message: String) {
-        val textViewComplete: TextView
-        textViewComplete = findViewById<View>(R.id.textViewComplete) as TextView
+        val textViewComplete:TextView = findViewById(R.id.textViewComplete)
         textViewComplete.text = message
     }
 

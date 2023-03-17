@@ -8,7 +8,6 @@ import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.todo.TodoDetailActivity
 
 class TodoDetailActivity : AppCompatActivity() {
     private var mTodoIndex = 0
@@ -34,14 +33,13 @@ class TodoDetailActivity : AppCompatActivity() {
         /* get the intent extra int for the todos index */
         val mTodoIndex = intent.getIntExtra(TODO_INDEX, 0)
         updateTextViewTodoDetail(mTodoIndex)
-        val checkboxIsComplete = findViewById<View>(R.id.checkBoxIsComplete) as CheckBox
+        val checkboxIsComplete:CheckBox = findViewById(R.id.checkBoxIsComplete)
         /* Register the onClick listener with the generic implementation mTodoListener */
         checkboxIsComplete.setOnClickListener(mTodoListener)
     }
 
     private fun updateTextViewTodoDetail(todoIndex: Int) {
-        val textViewTodoDetail: TextView
-        textViewTodoDetail = findViewById<View>(R.id.textViewTodoDetail) as TextView
+        val textViewTodoDetail:TextView = findViewById(R.id.textViewTodoDetail)
 
         /* display the first task from mTodo array in the TodoTextView */
         textViewTodoDetail.text = todoDetails[todoIndex]
@@ -52,7 +50,7 @@ class TodoDetailActivity : AppCompatActivity() {
         // get the clicked object and do something
         val id = v.id
         if (id == R.id.checkBoxIsComplete) {
-            val checkboxIsComplete = findViewById<View>(R.id.checkBoxIsComplete) as CheckBox
+            val checkboxIsComplete:CheckBox = findViewById(R.id.checkBoxIsComplete)
             setIsComplete(checkboxIsComplete.isChecked)
             finish()
         }
