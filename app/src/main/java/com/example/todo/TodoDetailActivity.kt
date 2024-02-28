@@ -1,95 +1,107 @@
 package com.example.todo
 
+
+import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.CheckBox
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.todo.ui.theme.TodoTheme
 
-class TodoDetailActivity : AppCompatActivity() {
-    private var mTodoIndex = 0
-    private lateinit var todoDetails: Array<String>
-
-    /* override to write the value of mTodoIndex into the Bundle with TODO_INDEX as its key */
-    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putInt(TODO_INDEX, mTodoIndex)
-    }
+class TodoDetailActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_todo_detail)
-        if (savedInstanceState != null) {
-            mTodoIndex = savedInstanceState.getInt(TODO_INDEX, 0)
-        }
 
-        /* TODO: refactor to a data layer */
-        val res = resources
-        todoDetails = res.getStringArray(R.array.todo_detail)
-
-        /* get the intent extra int for the todos index */
         val mTodoIndex = intent.getIntExtra(TODO_INDEX, 0)
-        updateTextViewTodoDetail(mTodoIndex)
-        val checkboxIsComplete:CheckBox = findViewById(R.id.checkBoxIsComplete)
-        /* Register the onClick listener with the generic implementation mTodoListener */
-        checkboxIsComplete.setOnClickListener(mTodoListener)
-    }
-
-    private fun updateTextViewTodoDetail(todoIndex: Int) {
-        val textViewTodoDetail:TextView = findViewById(R.id.textViewTodoDetail)
-
-        /* display the first task from mTodo array in the TodoTextView */
-        textViewTodoDetail.text = todoDetails[todoIndex]
-    }
-
-    /* Create an anonymous implementation of OnClickListener for all clickable view objects */
-    private val mTodoListener = View.OnClickListener { v: View ->
-        // get the clicked object and do something
-        val id = v.id
-        if (id == R.id.checkBoxIsComplete) {
-            val checkboxIsComplete:CheckBox = findViewById(R.id.checkBoxIsComplete)
-            setIsComplete(checkboxIsComplete.isChecked)
-            finish()
+        setContent {
+            TodoTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    TodoDetail(LocalContext.current.resources.getStringArray(R.array.todo)[mTodoIndex])
+                }
+            }
         }
-    }
-
-    private fun setIsComplete(isChecked: Boolean) {
-
-        /* celebrate with a static Toast! */
-        if (isChecked) {
-            Toast.makeText(this@TodoDetailActivity,
-                    "Hurray, it's done!", Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(this@TodoDetailActivity,
-                    "There is always tomorrow!", Toast.LENGTH_LONG).show()
-        }
-        val intent = Intent()
-        intent.putExtra(IS_TODO_COMPLETE, isChecked)
-        setResult(RESULT_OK, intent)
     }
 
     companion object {
-        /* Any calling activity would call this static method and pass the necessary
-       key, value data pair in an intent object. */
+
         fun newIntent(packageContext: Context?, todoIndex: Int): Intent {
             val intent = Intent(packageContext, TodoDetailActivity::class.java)
             intent.putExtra(TODO_INDEX, todoIndex)
             return intent
         }
+        const val IS_TODO_COMPLETE = "com.example.isTodoComplete"
 
-        /* name, value pair to be returned in an intent */
-        private const val IS_TODO_COMPLETE = "com.example.isTodoComplete"
-
-        /* In case of state change, due to rotating the phone
-       store the mTodoIndex to display the same mTodos element post state change
-
-       N.B. small amounts of data, typically IDs can be stored as key, value pairs in a Bundle
-       the alternative is to abstract view data to a ViewModel which can be in scope in all
-       Activity states and more suitable for larger amounts of data
-    */
         private const val TODO_INDEX = "com.example.todoIndex"
+    }
+}
+@Composable
+fun TodoDetail(todo:String , modifier: Modifier = Modifier) {
+    val isChecked = remember { mutableStateOf(false) }
+    val activity = (LocalContext.current as? Activity)
+
+    Column(modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally)
+    {
+        Text(
+            text = todo,
+            fontSize = 24.sp
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            Text(
+                text = stringResource(id = R.string.todo_complete),
+                fontSize = 12.sp
+            )
+            Spacer(Modifier.size(6.dp))
+            Checkbox(
+                checked = isChecked.value,
+                onCheckedChange = {
+                    isChecked.value = it
+                    val intent = Intent()
+                    intent.putExtra(TodoDetailActivity.IS_TODO_COMPLETE, isChecked.value)
+                    activity?.setResult(RESULT_OK, intent)
+                    activity?.finish()
+
+                }
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TodoDetailPreview() {
+    TodoTheme {
+        TodoDetail(LocalContext.current.resources.getStringArray(R.array.todo)[0])
     }
 }

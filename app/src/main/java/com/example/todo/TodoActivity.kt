@@ -1,113 +1,147 @@
 package com.example.todo
 
-import android.content.Intent
+
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.todo.ui.theme.TodoTheme
 
-class TodoActivity : AppCompatActivity() {
-    private lateinit var mTodos: Array<String>
-    private var mTodoIndex = 0
-
-    /* override to write the value of mTodoIndex into the Bundle with TODO_INDEX as its key */
-    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putInt(TODO_INDEX, mTodoIndex)
-        savedInstanceState.putString(TODO_COMPLETE,
-            (findViewById<View>(R.id.textViewComplete) as TextView).text as String?
-        )
-    }
+class TodoActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        /* call the super class onCreate to complete the creation of Activity
-           like the view hierarchy */
         super.onCreate(savedInstanceState)
-        Log.d(TAG, " **** Just to say the PC is in onCreate!")
 
-        /* set the user interface layout for this Activity
-         the layout file is defined in the project res/layout/activity_todo.xml file */
-        setContentView(R.layout.activity_todo)
-
-        /* check for saved state due to changes such as rotation or back button
-           and restore any saved state such as the todo_index */
-        var message = ""
-        if (savedInstanceState != null) {
-            mTodoIndex = savedInstanceState.getInt(TODO_INDEX, 0)
-            message = savedInstanceState.getString(TODO_COMPLETE, "")
-        }
-
-        /* TODO: Refactor to data layer */
-        val res = resources
-        mTodos = res.getStringArray(R.array.todo)
-
-        /* initialize member TextView so we can manipulate it later */
-        val textViewTodo: TextView
-        textViewTodo = findViewById(R.id.textViewTodo)
-        setTextViewComplete(message)
-
-        /* display the first task from mTodo array in the textViewTodo */
-        textViewTodo.text = mTodos[mTodoIndex]
-        val buttonNext:Button = findViewById(R.id.buttonNext)
-        buttonNext.setOnClickListener {
-            mTodoIndex = (mTodoIndex + 1) % mTodos.size
-            textViewTodo.text = mTodos[mTodoIndex]
-            setTextViewComplete("")
-        }
-        val todoDetailActivityResultLauncher = registerForActivityResult<Intent, ActivityResult>(
-                ActivityResultContracts.StartActivityForResult()
-        ) { result: ActivityResult ->
-            if (result.resultCode == RESULT_OK) {
-                val intent = result.data
-                val isTodoComplete = intent!!.getBooleanExtra(IS_TODO_COMPLETE, false)
-                updateTodoComplete(isTodoComplete)
-            } else {
-                Toast.makeText(this, R.string.back_button_pressed, Toast.LENGTH_SHORT).show()
+        setContent {
+            TodoTheme {
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    TodoWithButtons(LocalContext.current.resources.getStringArray(R.array.todo))
+                }
             }
         }
-        val buttonTodoDetail:Button = findViewById(R.id.buttonTodoDetail)
-        buttonTodoDetail.setOnClickListener {
-            val intent: Intent = TodoDetailActivity.Companion.newIntent(this@TodoActivity, mTodoIndex)
-            todoDetailActivityResultLauncher.launch(intent)
+    }
+}
+
+@Composable
+fun TodoWithButtons(todos:Array<String> , modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var stringIndex by rememberSaveable { mutableStateOf(0) }
+    var checked by rememberSaveable {
+        mutableStateOf(0)
+    }
+    val startForResult =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                if (intent?.getBooleanExtra(TodoDetailActivity.IS_TODO_COMPLETE, false) == true) {
+                    checked = 1
+                }
+            }
+            else {
+                createToast(context = context)
+            }
+        }
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(color = Color.Gray),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally)
+    {
+        val textColor = if (checked == 0) Color.White else Color.Red
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .background(color = Color.Green),
+            contentAlignment = Alignment.Center,
+            ) {
+            Text(
+                text = todos[stringIndex],
+                fontSize = 32.sp,
+                color = textColor
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Button(onClick = {
+                checked = 0
+                stringIndex = onPrevButton(stringIndex, todos.size)
+            }) {
+                Text(stringResource(R.string.prev))
+            }
+            Button(onClick = { startForResult.launch(TodoDetailActivity.Companion.newIntent(context, stringIndex)) }) {
+                Text(stringResource(R.string.detail))
+            }
+            Button(onClick = {
+                checked = 0
+                stringIndex = onNextButton(stringIndex, todos.size)
+            }) {
+                Text(stringResource(R.string.next))
+            }
         }
     }
+}
 
-    private fun updateTodoComplete(is_todo_complete: Boolean) {
-        val textViewTodo:TextView = findViewById(R.id.textViewTodo)
-        if (is_todo_complete) {
-            textViewTodo.setBackgroundColor(
-                    ContextCompat.getColor(this, R.color.backgroundSuccess))
-            textViewTodo.setTextColor(
-                    ContextCompat.getColor(this, R.color.colorSuccess))
-            setTextViewComplete("\u2713")
-        }
+fun onPrevButton(index:Int, length:Int): Int {
+    return if (index > 0) {
+        index - 1
+    } else {
+        length - 1
     }
+}
 
-    private fun setTextViewComplete(message: String) {
-        val textViewComplete:TextView = findViewById(R.id.textViewComplete)
-        textViewComplete.text = message
+fun onNextButton(index:Int, length:Int): Int {
+    return if (index < length - 1) {
+        index + 1
+    } else {
+        0
     }
+}
 
-    companion object {
-        private const val IS_SUCCESS = 0
-        const val TAG = "TodoActivity"
+fun createToast(context: Context) {
+    Toast.makeText(context, R.string.back_button_pressed, Toast.LENGTH_SHORT).show()
+}
 
-        /* map or name, value pair to be returned in an intent */
-        private const val IS_TODO_COMPLETE = "com.example.isTodoComplete"
-
-        /** In case of state change, due to rotating the phone
-         * store the mTodoIndex to display the same mTodos element post state change
-         * N.B. small amounts of data, typically IDs can be stored as key, value pairs in a Bundle
-         * the alternative is to abstract view data to a ViewModel which can be in scope in all
-         * Activity states and more suitable for larger amounts of data  */
-        private const val TODO_INDEX = "com.example.todoIndex"
-        private const val TODO_COMPLETE = "is_complete_message"
+@Preview(showBackground = true)
+@Composable
+fun TodosPreview() {
+    TodoTheme {
+        TodoWithButtons(LocalContext.current.resources.getStringArray(R.array.todo))
     }
 }
