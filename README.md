@@ -1,4 +1,4 @@
-# Android_todo_first
+# Android_todo_detail_app
 ### main branch
 * updated for Android 14 (JAVA)
 ### kotlin branch
