@@ -6,4 +6,8 @@
         <item name="android:background">@color/backgroundSuccess</item>
     </style>
 
+    <style name="AppTheme" parent="Theme.AppCompat">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+
 </resources>
