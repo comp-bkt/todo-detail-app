@@ -4,7 +4,8 @@ This project was originally written in Java - as developing for Android has evol
 Jetpack Compose - this repository now contains 3 branches. The application does the same on each branch -
 albeit Compose may look different on the UI.
 
-All branches compile and target to Android 15 (SDK 35)
+All branches compile and target to Android 16 (SDK 36)
+All branches use JAVA 21
 
 ### main branch
 * kotlin + compose

@@ -1,12 +1,12 @@
 package com.example.todo
 
 
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,12 +23,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.todo.ui.theme.TodoTheme
+import androidx.compose.ui.platform.LocalResources
 
 class TodoDetailActivity : ComponentActivity() {
 
@@ -42,7 +42,7 @@ class TodoDetailActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    TodoDetail(LocalContext.current.resources.getStringArray(R.array.todo)[mTodoIndex])
+                    TodoDetail(LocalResources.current.getStringArray(R.array.todo)[mTodoIndex])
                 }
             }
         }
@@ -63,7 +63,7 @@ class TodoDetailActivity : ComponentActivity() {
 @Composable
 fun TodoDetail(todo:String , modifier: Modifier = Modifier) {
     val isChecked = remember { mutableStateOf(false) }
-    val activity = (LocalContext.current as? Activity)
+    val activity = LocalActivity.current
 
     Column(modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -102,6 +102,6 @@ fun TodoDetail(todo:String , modifier: Modifier = Modifier) {
 @Composable
 fun TodoDetailPreview() {
     TodoTheme {
-        TodoDetail(LocalContext.current.resources.getStringArray(R.array.todo)[0])
+        TodoDetail(LocalResources.current.getStringArray(R.array.todo)[0])
     }
 }
